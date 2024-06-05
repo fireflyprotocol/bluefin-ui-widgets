@@ -9,25 +9,13 @@ import {
 	Form,
 	Space,
 } from "@bluefin-exchange/starship-v2";
-import { Radio } from "antd";
-import { ReactComponent as AddIcon } from "assets/icons/add.svg";
-import { ReactComponent as ArrowHorizontalIcon } from "assets/icons/arrows-horizontal.svg";
-import { ReactComponent as ArrowVerticalIcon } from "assets/icons/arrows-vertical.svg";
-import { ReactComponent as CaretDown } from "assets/icons/caret-down.svg";
-import { ReactComponent as ChevronRightIcon } from "assets/icons/chevron-right.svg";
 import { ReactComponent as GenericTokenIcon } from "assets/icons/ethGeneric.svg";
-import { ReactComponent as HistoryIcon } from "assets/icons/history.svg";
-import { ReactComponent as ReplaceIcon } from "assets/icons/replace.svg";
-import { ReactComponent as SettingIcon } from "assets/icons/setting.svg";
-import { ReactComponent as SubtractIcon } from "assets/icons/subtract.svg";
-import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
-import BigNumber from "bignumber.js";
 import clsx from "clsx";
 
-import { NotificationService } from "utils/notification.service";
+import { DEFAULT_PRECISION } from "constants/Common";
+import { RouteVisualizationDetail } from "components/Swap/Swap";
 
 import styles from "./SwapRouteModal.module.scss";
-import { SplitPaths } from "@bluefin-exchange/aggregator-sdk/build/src/interfaces";
 
 type swapTokeDetail = {
 	tokenName: string;
@@ -41,46 +29,19 @@ type MaxSlippageModalProps = {
 	routeDetails: {
 		destinationDetails: swapTokeDetail;
 		sourceDetails: swapTokeDetail;
-		splits: SplitPaths[];
+		routeVisualization: {
+			numberOfHops: number;
+			numberOfExchanges: number;
+			pathList: string[];
+			pathDetails: RouteVisualizationDetail;
+		};
 	};
 };
 
 const SwapRouteModal = (props: MaxSlippageModalProps) => {
 	const { isVisible, onClose, routeDetails } = props;
 
-	const { sourceDetails, destinationDetails, splits } = routeDetails;
-
-	const resetState = () => {};
-
-	// Get all divs within the main container
-	const mainContainer = document.getElementById("mainContainer");
-
-	// Get all first-level child divs within the main container
-	const divs = mainContainer?.children ?? [];
-
-	// Initialize max width variable
-	let maxWidth = 0;
-
-	// Loop through all divs to find max width
-	for (let i = 0; i < divs?.length; i++) {
-		//@ts-ignore
-		if (divs[i]?.offsetWidth) {
-			//@ts-ignore
-			const divWidth = divs[i].offsetWidth;
-			if (divWidth > maxWidth) {
-				maxWidth = divWidth;
-			}
-		}
-	}
-	console.log(maxWidth);
-	// Set width of all divs to max width
-	for (let i = 0; i < divs.length; i++) {
-		//@ts-ignore
-		if (divs[i]?.["style"]["width"]) {
-			//@ts-ignore
-			divs[i]["style"]["width"] = maxWidth + "px";
-		}
-	}
+	const { sourceDetails, destinationDetails, routeVisualization } = routeDetails;
 	return (
 		<Modal
 			title={"Routing"}
@@ -90,7 +51,6 @@ const SwapRouteModal = (props: MaxSlippageModalProps) => {
 			closable
 			onCancel={() => {
 				onClose();
-				resetState();
 			}}>
 			<p className={styles.description}>
 				Bluefin compared prices across multiple liquidity sources on the Ethereum
@@ -116,7 +76,9 @@ const SwapRouteModal = (props: MaxSlippageModalProps) => {
 								<Space size={4}>
 									<GenericTokenIcon />
 									<Space size={2}>
-										{routeDetails.sourceDetails.amount}
+										{(+routeDetails.sourceDetails.amount).toFixed(
+											DEFAULT_PRECISION
+										)}
 										<p className={styles.symbol}>
 											{routeDetails.sourceDetails.tokenSymbol}
 										</p>
@@ -129,7 +91,8 @@ const SwapRouteModal = (props: MaxSlippageModalProps) => {
 								<Space size={4}>
 									<GenericTokenIcon />
 									<Space size={2}>
-										{routeDetails.destinationDetails.amount}
+										{(+routeDetails.destinationDetails
+											.amount).toFixed(DEFAULT_PRECISION)}
 										<p className={styles.symbol}>
 											{routeDetails.destinationDetails.tokenSymbol}
 										</p>
@@ -139,167 +102,112 @@ const SwapRouteModal = (props: MaxSlippageModalProps) => {
 						</Col>
 					</Row>
 				</Col>
-				<Col span={24}>
+				<> {console.log(routeVisualization)}</>
+				<Col span={24} style={{ paddingRight: "24px", paddingLeft: "24px" }}>
 					<Row
 						style={{ marginTop: "4px" }}
-						gutter={[16, 16]}
+						gutter={[0, 0]}
 						className={styles.parentRow}>
-						{[...splits, ...splits].map((item) => {
-							const edges = item.edges.reduce(
-								(prv: { [key in string]: string }, currentValue) => {
-									return {
-										...prv,
-										[currentValue.fromNode]: currentValue.toNode,
-									};
-								},
-								{}
-							);
+						{routeVisualization.pathList.map((item, index) => {
+							const hops = routeVisualization.pathDetails[item].pathDetail;
+							const lastIndex = routeVisualization.pathList.length - 1;
+							const [_, ...path] =
+								routeVisualization.pathDetails[item].path;
 							return (
 								<>
-									<Col span={24}>
+									<Col
+										className={clsx({
+											[styles.fullVerticalLine]:
+												lastIndex !== index,
+											[styles.hopeDetailsCol]: true,
+										})}
+										span={24}>
+										<div className={styles.index_dashed}></div>
 										<Row
 											className={clsx({
 												[styles.overflowScroll]: true,
 												[styles.hopDetailsSectionRow]: true,
+												[styles.fullHorizontalLine]: true,
 											})}
 											justify={"space-around"}
+											align={"middle"}
 											gutter={[16, 16]}>
-											<Col>
-												<Space
-													size={4}
-													direction="vertical"
-													className={styles.hopDetailSection}>
-													<Row
-														className={clsx({
-															[styles.overflowScroll]: true,
-														})}
-														justify={"start"}
-														gutter={[4, 4]}>
-														<Col>
-															<GenericTokenIcon />
-														</Col>
-														<Col>{"116.804"}</Col>
-													</Row>
-
-													{[0, 0, 0].map(() => (
-														<Row
-															className={clsx({
-																[styles.overflowScroll]:
-																	true,
-																[styles.tiles]: true,
-															})}
-															justify={"space-around"}
-															gutter={[16, 8]}>
-															<Col>
-																Uniswap V3 - 0.3% Pool
-															</Col>
-															<Col>26%</Col>
-														</Row>
-													))}
-												</Space>
+											<Col
+												className={clsx({
+													[styles.tiles]: true,
+												})}>
+												{
+													+(
+														(routeVisualization.pathDetails[
+															item
+														].quantityIn /
+															+sourceDetails.amount) *
+														100
+													).toFixed(DEFAULT_PRECISION)
+												}
+												%
 											</Col>
-											<Col>
-												<Space
-													size={4}
-													direction="vertical"
-													className={styles.hopDetailSection}>
-													<Row
-														className={clsx({
-															[styles.overflowScroll]: true,
-														})}
-														justify={"start"}
-														gutter={[4, 4]}>
-														<Col>
-															<GenericTokenIcon />
-														</Col>
-														<Col>{"116.804"}</Col>
-													</Row>
-
-													{[0, 0, 0].map(() => (
-														<Row
+											{path.map((item) => {
+												const pathDetails = hops[item];
+												return (
+													<Col>
+														<Space
+															size={4}
+															direction="vertical"
 															className={clsx({
-																[styles.overflowScroll]:
+																[styles.hopBackground]:
 																	true,
-																[styles.tiles]: true,
-															})}
-															justify={"space-around"}
-															gutter={[16, 8]}>
-															<Col span={18}>
-																Uniswap V3 - 0.3% Pool
-															</Col>
-															<Col span={6}>26%</Col>
-														</Row>
-													))}
-												</Space>
-											</Col>
-											<Col>
-												<Space
-													size={4}
-													direction="vertical"
-													className={styles.hopDetailSection}>
-													<Row
-														className={clsx({
-															[styles.overflowScroll]: true,
-														})}
-														justify={"start"}
-														gutter={[4, 4]}>
-														<Col>
-															<GenericTokenIcon />
-														</Col>
-														<Col>{"116.804"}</Col>
-													</Row>
+																[styles.hopDetailSection]:
+																	true,
+															})}>
+															<Row
+																className={clsx({
+																	[styles.overflowScroll]:
+																		true,
+																})}
+																justify={"space-between"}
+																gutter={[4, 4]}>
+																<Col span={18}>
+																	<GenericTokenIcon />
+																	{pathDetails.name}
+																</Col>
+															</Row>
 
-													{[0, 0, 0].map(() => (
-														<Row
-															className={clsx({
-																[styles.overflowScroll]:
-																	true,
-																[styles.tiles]: true,
-															})}
-															justify={"space-around"}
-															gutter={[16, 8]}>
-															<Col>
-																Uniswap V3 - 0.3% Pool
-															</Col>
-															<Col>26%</Col>
-														</Row>
-													))}
-												</Space>
-											</Col>
-											<Col>
-												<Space
-													size={4}
-													direction="vertical"
-													className={styles.hopDetailSection}>
-													<Row
-														className={clsx({
-															[styles.overflowScroll]: true,
-														})}
-														justify={"start"}
-														gutter={[4, 4]}>
-														<Col>
-															<GenericTokenIcon />
-														</Col>
-														<Col>{"116.804"}</Col>
-													</Row>
-
-													{[0, 0, 0].map(() => (
-														<Row
-															className={clsx({
-																[styles.overflowScroll]:
-																	true,
-																[styles.tiles]: true,
-															})}
-															justify={"space-around"}
-															gutter={[16, 8]}>
-															<Col>
-																Uniswap V3 - 0.3% Pool
-															</Col>
-															<Col>26%</Col>
-														</Row>
-													))}
-												</Space>
-											</Col>
+															{pathDetails.exchangesDetails.map(
+																(item) => (
+																	<Row
+																		className={clsx({
+																			[styles.overflowScroll]:
+																				true,
+																			[styles.tiles]:
+																				true,
+																		})}
+																		justify={
+																			"space-between"
+																		}
+																		gutter={[16, 8]}>
+																		<Col>
+																			{item.name}
+																		</Col>
+																		<Col>
+																			{
+																				+(
+																					(item.quantity /
+																						pathDetails.quantityOut) *
+																					100
+																				).toFixed(
+																					DEFAULT_PRECISION
+																				)
+																			}
+																			%
+																		</Col>
+																	</Row>
+																)
+															)}
+														</Space>
+													</Col>
+												);
+											})}
 										</Row>
 									</Col>
 								</>

@@ -4,9 +4,10 @@
   "description": "This package will contains all the UI widget which will be provide by bluefin for user to plug and play in there custom applications.",
   "main": "src/index.tsx",
   "dependencies": {
-    "@bluefin-exchange/aggregator-sdk": "^1.0.7",
+    "@bluefin-exchange/aggregator-sdk": "^1.0.18",
+    "@bluefin-exchange/bluefin-v2-client": "^5.2.37",
     "@bluefin-exchange/starship-v2": "^1.1.11",
-    "@cetusprotocol/cetus-sui-clmm-sdk": "^4.2.0",
+    "@cetusprotocol/cetus-sui-clmm-sdk": "^4.3.1",
     "@firefly-exchange/library": "^1.2.22",
     "@suiet/wallet-kit": "^0.2.24",
     "clsx": "^2.1.1",
@@ -18,8 +19,6 @@
     "react-hot-toast": "^2.4.1",
     "react-i18next": "^14.1.1",
     "react-loading-skeleton": "^3.4.0",
-    "react-redux": "^9.1.1",
-    "react-router-dom": "^6.23.0",
     "sass": "^1.75.0"
   },
   "devDependencies": {
@@ -47,7 +46,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc && webpack build"
+    "build": "tsc"
   },
   "author": "saleh hayat",
   "license": "ISC",

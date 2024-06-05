@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 
-import { AggregatorSDK, Environments, OnChain, } from "@bluefin-exchange/aggregator-sdk";
+import {
+	AggregatorSDK,
+	Environments,
+	OnChain,
+	SuiBlocks,
+} from "@bluefin-exchange/aggregator-sdk";
 import {
 	BluefinAggregatorResponse,
 	GetAssetsResponse,
+	SplitPaths,
 } from "@bluefin-exchange/aggregator-sdk/build/src/interfaces";
+import { TransactionBlock } from "@bluefin-exchange/bluefin-v2-client";
 import {
 	Button,
 	Col,
@@ -15,6 +22,8 @@ import {
 	Space,
 } from "@bluefin-exchange/starship-v2";
 import { CoinAsset } from "@cetusprotocol/cetus-sui-clmm-sdk";
+import { Signer } from "@mysten/sui.js/dist/cjs/cryptography";
+import { WalletContextState } from "@suiet/wallet-kit";
 import { ReactComponent as ArrowHorizontalIcon } from "assets/icons/arrows-horizontal.svg";
 import { ReactComponent as ArrowVerticalIcon } from "assets/icons/arrows-vertical.svg";
 import { ReactComponent as CaretDown } from "assets/icons/caret-down.svg";
@@ -22,15 +31,15 @@ import { ReactComponent as ChevronRightIcon } from "assets/icons/chevron-right.s
 import { ReactComponent as GenericTokenIcon } from "assets/icons/ethGeneric.svg";
 import { ReactComponent as HistoryIcon } from "assets/icons/history.svg";
 import { ReactComponent as ReplaceIcon } from "assets/icons/replace.svg";
+import { ReactComponent as Routing } from "assets/icons/routing.svg";
 import { ReactComponent as SettingIcon } from "assets/icons/setting.svg";
 import { ReactComponent as WalletIcon } from "assets/icons/wallet.svg";
 import BigNumber from "bignumber.js";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { WalletContextState } from "@suiet/wallet-kit";
+
 
 import { RenderIfElse } from "components/HOCs";
-
 import Skeleton from "components/Skeleton";
 import { DEFAULT_PRECISION } from "constants/Common";
 import { NotificationService } from "utils/notification.service";
@@ -42,13 +51,10 @@ import {
 
 import styles from "./index.module.scss";
 import MaxSlippageModal from "./Modals/MaxSlippageModal/MaxSlippageModal";
-import "./swapColour.scss";
 import SettingModal from "./Modals/SettingModal/SettingModal";
 import SwapRouteModal from "./Modals/SwapRouteModal/SwapRouteModal";
 import TokenSelectModal from "./Modals/TokenSelectModal/TokenSelectModal";
-
-import { Signer } from "@mysten/sui.js/dist/cjs/cryptography";
-
+import "./swapColour.scss";
 
 export type TokenDetails = GetAssetsResponse & {
 	name?: string;
@@ -56,18 +62,41 @@ export type TokenDetails = GetAssetsResponse & {
 	iconURl?: string;
 };
 
+export type RouteVisualizationDetail = {
+	[key in string]: {
+		quantityIn: number;
+		quantityOut: number;
+		path: string[];
+		pathDetail: {
+			[key in string]: {
+				name: string;
+				quantityIn: number;
+				quantityOut: number;
+				exchangesDetails: { quantity: number; name: string }[];
+			};
+		};
+	};
+};
+
+const DEFAULT_SOURCE_TOKEN =
+	"0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI";
+const DEFAULT_TARGET_TOKEN =
+	"0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN";
+
 export type PriceData = { [key in string]: { price: number; symbol: string } };
 const Swap = ({
 	suiSignerObject,
 	onConnectWallet,
+	onClickHistoryButton
 }: {
 	suiSignerObject: Signer & WalletContextState;
 	onConnectWallet: () => void;
+	onClickHistoryButton:() => void;
 }) => {
 	const [client, setClient] = useState<AggregatorSDK>(
 		new AggregatorSDK(Environments["prod"], suiSignerObject)
 	);
-	const [showSwapRoute, setShowSwapRoute] = useState(true);
+	const [showSwapRoute, setShowSwapRoute] = useState(false);
 	const [isLoadingTokenList, setIsLoadingTokenList] = useState(false);
 	const [isLoadingFromPrice, setIsLoadingFromPrice] = useState(false);
 	const [isLoadingToPrice, setIsLoadingToPrice] = useState(false);
@@ -101,7 +130,15 @@ const Swap = ({
 	const [isBalanceLoading, setIsBalanceLoading] = useState(false);
 	const [userTokenDetails, setUserTokenDetails] = useState<CoinAsset[]>([]);
 	const [priceObject, setPriceObject] = useState<PriceData>({});
-
+	const [routeVisualizationDetail, setRoutVisualizationDetail] = useState<
+		| {
+				numberOfHops: number;
+				numberOfExchanges: number;
+				pathList: string[];
+				pathDetails: RouteVisualizationDetail;
+		  }
+		| undefined
+	>(undefined);
 	const [fromWalletBalance, setFromWalletBalance] = useState(0);
 
 	useEffect(() => {
@@ -149,7 +186,7 @@ const Swap = ({
 						? setToQuantity(undefined)
 						: setFromQuantity(undefined);
 				}
-			}, 100);
+			}, 500);
 		}
 
 		return () => {
@@ -169,7 +206,100 @@ const Swap = ({
 		if (tokenList.length > 0 && userTokenDetails.length > 0) {
 			fetchAndUpdatePrice();
 		}
+
+		setFromToken(
+			tokenList.find((item) => item.address === DEFAULT_SOURCE_TOKEN) ??
+				tokenList.find((_) => true)
+		);
 	}, [tokenList, userTokenDetails]);
+
+	const transformSplits = (
+		splits: SplitPaths[],
+		fromToken: TokenDetails,
+		toToken: TokenDetails
+	) => {
+		let hops = 0;
+		let exchanges: { [key in string]: boolean } = {};
+
+		const pathArray: string[] = [];
+		const pathDetails: RouteVisualizationDetail = {};
+
+		splits.map((item) => {
+			const path = item.edges.reduce((list: string[], item) => {
+				if (list.length && list.findLast((item) => true) == item.fromNode) {
+					return [...list, item.toNode];
+				}
+				return [...list, item.fromNode, item.toNode];
+			}, []);
+
+			const pathString = path.join(",");
+			if (!pathDetails[pathString]) {
+				hops += item.edges.length;
+				pathArray.push(path.join(","));
+			}
+			const perviousValue = pathDetails[pathString] ?? {};
+			pathDetails[pathString] = perviousValue ?? {};
+			pathDetails[pathString].quantityIn =
+				perviousValue.quantityIn ??
+				0 +
+					new BigNumber(item.inputAmount)
+						.div(
+							new BigNumber(10).pow(
+								item.nodes?.[fromToken.id ?? ""].decimals ?? 0
+							)
+						)
+						.toNumber();
+			pathDetails[pathString].quantityOut =
+				perviousValue.quantityOut ??
+				0 +
+					new BigNumber(item.outputAmount)
+						.div(
+							new BigNumber(10).pow(item.nodes?.[toToken.id].decimals ?? 0)
+						)
+						.toNumber();
+
+			pathDetails[pathString].path = path;
+
+			item.edges.map((edge) => {
+				exchanges[edge.exchange] = true;
+				const sourceDecimal = item.nodes[edge.fromNode].decimals;
+				const destinationDecimal = item.nodes[edge.toNode].decimals;
+				if (!pathDetails[pathString].pathDetail) {
+					pathDetails[pathString].pathDetail = {};
+				}
+				pathDetails[pathString].pathDetail[edge.toNode] = {
+					name: (item.nodes as any)[edge.toNode]?.name ?? "",
+					quantityIn:
+						(perviousValue.pathDetail[edge.toNode]?.quantityIn ?? 0) +
+						new BigNumber(item.inputAmount)
+							.div(new BigNumber(10).pow(sourceDecimal))
+							.toNumber(),
+					quantityOut:
+						(perviousValue.pathDetail[edge.toNode]?.quantityOut ?? 0) +
+						new BigNumber(item.outputAmount)
+							.div(new BigNumber(10).pow(destinationDecimal))
+							.toNumber(),
+
+					exchangesDetails: [
+						...(perviousValue.pathDetail[edge.toNode]?.exchangesDetails ??
+							[]),
+						{
+							name: edge.exchange,
+							quantity: new BigNumber(item.outputAmount)
+								.div(new BigNumber(10).pow(destinationDecimal))
+								.toNumber(),
+						},
+					],
+				};
+			});
+		});
+		setRoutVisualizationDetail({
+			numberOfHops: hops,
+			numberOfExchanges: Object.keys(exchanges).length,
+			pathList: pathArray,
+			pathDetails: pathDetails,
+		});
+	};
 
 	const fetchAndUpdatePrice = () => {
 		if (tokenList && userTokenDetails) {
@@ -243,7 +373,26 @@ const Swap = ({
 			client.suiClient
 		);
 
-		setUserTokenDetails(coins);
+		const mergeCoinBalance = coins.reduce(
+			(merge: { [key in string]: CoinAsset }, item) => {
+				if (merge[item.coinAddress]) {
+					return {
+						...merge,
+						[item.coinAddress]: {
+							...merge[item.coinAddress],
+							balance:
+								BigInt(merge[item.coinAddress].balance) +
+								BigInt(item.balance),
+						},
+					};
+				} else {
+					return { ...merge, [item.coinAddress]: item };
+				}
+			},
+			{}
+		);
+
+		setUserTokenDetails(Object.values(mergeCoinBalance));
 	};
 
 	const fetchTokensList = async (client: AggregatorSDK) => {
@@ -297,7 +446,7 @@ const Swap = ({
 		if (client) {
 			interval = setInterval(() => {
 				onRefresh();
-			}, 20000);
+			}, 200000);
 		}
 
 		return () => {
@@ -314,15 +463,19 @@ const Swap = ({
 		isByAmountIn: boolean
 	) => {
 		setIsLoadingSwapDetails(true);
+		setRoutVisualizationDetail(undefined);
 		try {
 			const swapRoute = await client.findBestSwapRoute(
 				from.id,
 				to.id,
 				quantity,
 				isByAmountIn,
-				true
+				true,
+				3
 			);
+
 			setSwapDetails(swapRoute);
+
 			if (swapRoute.byAmountIn) {
 				setToQuantity(
 					new BigNumber(swapRoute.outputAmount)
@@ -336,15 +489,16 @@ const Swap = ({
 						.toNumber()
 				);
 			}
+			transformSplits(swapRoute.splits, from, to);
 		} catch (e: any) {
 			NotificationService.makeToast(
-				"Failed to load Assets",
+				"Failed to load swap route",
 				e?.message && e.message,
 				"error"
 			);
+			setRoutVisualizationDetail(undefined);
+			setSwapDetails(undefined);
 		}
-
-		setShowSwapRoute(true);
 		setIsLoadingSwapDetails(false);
 	};
 
@@ -367,7 +521,11 @@ const Swap = ({
 
 				setSwappableAssetList(swappableAssetDetailsList);
 				if (!toToken || !swappableMap[toToken.id]) {
-					setToToken(swappableAssetDetailsList[0]);
+					setToToken(
+						swappableAssetDetailsList.find(
+							(item) => item.address === DEFAULT_TARGET_TOKEN
+						) ?? swappableAssetDetailsList.find((_) => true)
+					);
 				}
 			} else {
 				NotificationService.makeToast(
@@ -400,6 +558,7 @@ const Swap = ({
 		});
 		setSwitchLoading(false);
 	};
+
 	return (
 		<>
 			<Form
@@ -417,7 +576,7 @@ const Swap = ({
 							<Row
 								justify={"center"}
 								className={clsx({ [styles.width100]: true })}>
-								<Col span={8}>
+								<Col span={8} xs={22} sm={22} md={8}>
 									<Row
 										justify={"space-between"}
 										className={clsx({ [styles.width100]: true })}>
@@ -456,10 +615,9 @@ const Swap = ({
 												<Button
 													shape="round"
 													styleType="neutral"
-													disabled
 													icon={<HistoryIcon />}
 													loading={false}
-													onClick={() => {}}
+													onClick={onClickHistoryButton}
 													size="large"></Button>
 												<Button
 													shape="round"
@@ -478,7 +636,7 @@ const Swap = ({
 							<Row
 								justify={"center"}
 								className={clsx({ [styles.width100]: true })}>
-								<Col span={8}>
+								<Col span={8} xs={22} sm={22} md={8}>
 									<Row
 										justify={"space-between"}
 										gutter={[0, 12]}
@@ -737,6 +895,28 @@ const Swap = ({
 														</Button>
 													}></Input>
 											</FormItem>
+
+											{routeVisualizationDetail && (
+												<span className={styles.routeSpan}>
+													<Space
+														size={8}
+														className={styles.pointer}
+														onClick={() => {
+															setShowSwapRoute(true);
+														}}>
+														<Routing />
+														<span className={styles.text}>
+															Trading Route
+														</span>
+														<span className={styles.details}>
+															<span className={styles.text}>
+																{`${routeVisualizationDetail.numberOfHops} hops + ${routeVisualizationDetail.pathList.length} Routes`}
+															</span>
+														</span>
+														<ChevronRightIcon />
+													</Space>
+												</span>
+											)}
 										</Col>
 										<Col span={24}>
 											{
@@ -762,40 +942,142 @@ const Swap = ({
 																			client &&
 																			swapDetails
 																		) {
-																			const tx =
-																				await client.buildSwapTx(
-																					swapDetails,
-																					new BigNumber(
-																						slippagePercentage
-																					)
-																						.div(
-																							100
+																			let tx;
+																			try {
+																				tx =
+																					await client.buildSwapTx(
+																						swapDetails,
+																						new BigNumber(
+																							slippagePercentage
 																						)
-																						.toNumber()
+																							.div(
+																								100
+																							)
+																							.toNumber(),
+																						{
+																							sponsored:
+																								true,
+																						}
+																					);
+																			} catch (e) {
+																				throw {
+																					message:
+																						e,
+																				};
+																			}
+
+																			const gaslessPayloadBase64 =
+																				await SuiBlocks.buildGaslessTxPayloadBytes(
+																					tx,
+																					client.suiClient
 																				);
 
-																			const response =
-																				await suiSignerObject.signAndExecuteTransactionBlock(
+																			const {
+																				ok,
+																				response:
 																					{
-																						transactionBlock:
-																							tx as any,
+																						data,
+																						message,
+																					},
+																			} =
+																				await client.apis.sponsorTransaction(
+																					gaslessPayloadBase64,
+																					suiSignerObject.address ??
+																						"",
+																					swapDetails
+																				);
+																			if (!ok) {
+																				throw (
+																					data as any
+																				)?.message
+																					? JSON.parse(
+																							(
+																								data as any
+																							)
+																								?.message
+																					  )
+																					: (
+																							data as any
+																					  )
+																							?.message;
+																			}
+
+																			if (
+																				suiSignerObject?.adapter &&
+																				suiSignerObject.account
+																			) {
+																				const userSignature =
+																					await suiSignerObject.adapter.signTransactionBlock(
+																						{
+																							//@ts-ignore
+																							transactionBlock:
+																								TransactionBlock.from(
+																									data.txBytes
+																								),
+																							account:
+																								suiSignerObject.account,
+																						}
+																					);
+
+																				const {
+																					ok,
+																					response,
+																				} =
+																					await client.apis.executeSwap(
+																						userSignature.transactionBlockBytes,
+																						suiSignerObject
+																							.account
+																							.address,
+																						userSignature.signature,
+																						data.signature
+																					);
+
+																				console.log(
+																					{
+																						tx_bytes:
+																							userSignature.transactionBlockBytes,
+																						user_sig:
+																							userSignature.signature,
+																						gas_sig:
+																							data.signature,
+																						sender: suiSignerObject
+																							.account
+																							.address,
+																					},
+																					{
+																						response,
 																					}
 																				);
 
-																			if (
-																				!response.errors
-																			) {
-																				NotificationService.makeToast(
-																					"Successful",
-																					"Swap executed Successfully",
-																					"success"
-																				);
-																				onRefresh();
+																				if (ok) {
+																					NotificationService.makeToast(
+																						"Successful",
+																						"Swap executed Successfully",
+																						"success"
+																					);
+																					onRefresh();
+																				} else {
+																					throw Error(
+																						response
+																							?.data
+																							?.message
+																							? JSON.parse(
+																									response
+																										?.data
+																										?.message
+																							  )
+																									?.message
+																							: response
+																									?.data
+																									?.message
+																					);
+																				}
 																			}
 																		}
 																	} catch (e: any) {
+																		console.log(e);
 																		let errorMessage =
-																			e?.message.includes(
+																			e?.message?.includes(
 																				"Insufficient balance"
 																			)
 																				? "You don't have sufficient balance to execute swap"
@@ -803,10 +1085,15 @@ const Swap = ({
 																				? e?.message
 																				: "Something went wrong";
 
+																		console.log(
+																			errorMessage
+																		);
+
 																		NotificationService.makeToast(
 																			"Swap Failed",
 																			errorMessage ??
 																				"Something went wrong",
+
 																			"error"
 																		);
 																	}
@@ -934,7 +1221,7 @@ const Swap = ({
 					setSlippagePercentage(item);
 				}}
 			/>
-			{swapDetails && (
+			{routeVisualizationDetail && (
 				<SwapRouteModal
 					isVisible={showSwapRoute}
 					onClose={() => {
@@ -945,15 +1232,15 @@ const Swap = ({
 							tokenName: toToken?.coin ?? "",
 							tokenSymbol: toToken?.coin ?? "",
 							amount: (toQuantity || 0).toString(),
-							address: "",
+							address: toToken?.id ?? "",
 						},
 						sourceDetails: {
 							tokenName: fromToken?.coin ?? "",
 							tokenSymbol: fromToken?.coin ?? "",
 							amount: (fromQuantity || 0).toString(),
-							address: "",
+							address: fromToken?.id ?? "",
 						},
-						splits: swapDetails.splits,
+						routeVisualization: routeVisualizationDetail,
 					}}
 				/>
 			)}

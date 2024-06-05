@@ -11,7 +11,6 @@ import clsx from "clsx";
 import { NotificationService } from "utils/notification.service";
 
 import styles from "./MaxSlippageModal.module.scss";
-import React from "react";
 
 type MaxSlippageModalProps = {
 	isVisible: boolean;

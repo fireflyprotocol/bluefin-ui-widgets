@@ -10,10 +10,9 @@ import clsx from "clsx";
 
 import { DEFAULT_PRECISION } from "constants/Common";
 import { TokenDetails } from "components/Swap/Swap";
-import { sanitizeAccountAddress } from "utils/utils";
+import { numberToCommas, sanitizeAccountAddress } from "utils/utils";
 
 import styles from "./TokenSelectModal.module.scss";
-import React from "react";
 
 type TokenSelectModalProps = {
 	isVisible: boolean;
@@ -62,7 +61,8 @@ const ViewTile = (props: {
 				<Col>
 					<Space direction={"vertical"} align="end" size={0}>
 						<div className={styles.title}>
-							{balance ? balance : 0.0} {coinSymbol.toUpperCase()}
+							{numberToCommas(+(balance ?? 0.0), DEFAULT_PRECISION)}{" "}
+							{coinSymbol.toUpperCase()}
 						</div>
 						{price && (
 							<div className={styles.subInfo}>
@@ -169,7 +169,7 @@ const TokenSelectModal = (props: TokenSelectModalProps) => {
 											return (
 												<Button
 													className={clsx({
-														["starship-btn-neutral"]: true,
+														"starship-btn-neutral": true,
 														[styles.roundedText]: true,
 													})}
 													onClick={() => {

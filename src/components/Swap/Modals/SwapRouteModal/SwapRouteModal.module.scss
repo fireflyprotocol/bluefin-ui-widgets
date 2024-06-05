@@ -142,8 +142,8 @@
 // }
 
 .routeModal {
-	width: 720px !important;
-	max-width: 720px !important;
+	width: 920px !important;
+	max-width: 920px !important;
 	.description {
 		align-self: stretch;
 		color: var(--baseColor-base-700, #938f99);
@@ -176,6 +176,13 @@
 		}
 	}
 
+	.tiles {
+		padding: 4px 8px;
+		border-radius: 8px;
+		background: var(--baseColor-base-400, #2b2930);
+		margin-left: 0px !important;
+		margin-right: 0px !important;
+	}
 	.roundedTextLabel {
 		display: flex;
 		padding: 8px 16px 8px 12px;
@@ -238,4 +245,122 @@
 			0px 8px 8px 0px rgba(0, 0, 0, 0.04), 0px 6px 4px 0px rgba(0, 0, 0, 0.04);
 		backdrop-filter: blur(24px);
 	}
+}
+
+/////////////
+///
+///
+///
+///
+.parentRow {
+	width: 100%;
+
+	margin: 10px 0; /* Adjust margin as needed */
+}
+
+.hopDetailsSectionRow {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	position: relative;
+	overflow: hidden; // Ensure content doesn't overflow
+
+	// &::before,
+	// &::after {
+	// 	content: "";
+	// 	position: absolute;
+	// 	top: 0;
+	// 	width: 1px; // Adjust width as needed
+	// 	height: var(--before-after-height, 100%);
+	// 	background-color: var(--baseColor-base-500, #36343b); // Change color as needed
+	// }
+	// &::before {
+	// 	content: "";
+	// 	position: absolute;
+	// 	top: 0;
+	// 	left: 50%;
+	// 	transform: translateX(-50%);
+	// 	width: var(--line-width, 1px); /* Adjust width as needed */
+	// 	height: var(--line-height, 50%); /* Adjust height as needed */
+	// 	background: linear-gradient(
+	// 		to right,
+	// 		var(--baseColor-base-500, #36343b) 50%,
+	// 		transparent 50%
+	// 	);
+	// 	background-size: 100% 100%; /* Ensure the horizontal line covers the entire area */
+	// }
+
+	// &::before {
+	// 	left: 0;
+	// }
+
+	// &::before {
+	// 	content: "";
+	// 	position: absolute;
+	// 	top: 50%;
+	// 	left: 0; /* Position the vertical line at the left edge */
+	// 	width: 100%; /* Ensure the vertical line covers the entire width */
+	// 	height: var(--line-height, 1px); /* Adjust height as needed */
+	// 	background: linear-gradient(
+	// 		to right,
+	// 		var(--baseColor-base-500, #36343b) 50%,
+	// 		transparent 50%
+	// 	);
+	// 	background-size: 100% 100%; /* Ensure the horizontal line covers the entire area */
+	// }
+
+	// &::after {
+	// 	content: "";
+	// 	position: absolute;
+	// 	top: 50%;
+	// 	left: 50%;
+	// 	transform: translateX(-50%);
+	// 	width: var(--line-width, 50%); /* Adjust width as needed */
+	// 	height: var(--line-height, 1px); /* Adjust height as needed */
+	// 	background-color: var(--baseColor-base-500, #36343b); /* Change color as needed */
+	// }
+}
+
+.hopeDetailsCol {
+	padding: 8px;
+}
+.fullVerticalLine {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	position: relative;
+	overflow: hidden; // Ensure content doesn't overflow
+
+	&::before,
+	&::after {
+		border-left: 1px solid #36343b;
+		bottom: -8px; // Extend 8px below the bottom of the container
+		content: " ";
+		display: block;
+		position: absolute;
+		top: 50%;
+		z-index: 2;
+	}
+
+	&::before {
+		left: 0;
+	}
+	&::after {
+		right: 0;
+	}
+}
+
+.hopBackground {
+	background: var(--baseColor-base-tr-100, rgb(36, 34, 40)) !important;
+}
+
+.index_dashed {
+	border: 1px solid #36343b;
+	border-radius: 8px;
+	border-top-color: transparent;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	bottom: 50%;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
