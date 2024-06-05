@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [main]
+    branches: [saleh/swap-widget-setup]
   release:
     types: [published]
 name: Publish to NPM
