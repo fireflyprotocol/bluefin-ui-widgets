@@ -1,0 +1,115 @@
+html:root body.starship-v2,
+html:root body.starship-v2 *,
+header.starship-v2 {
+	--base-0: #f8f9fb;
+	--base-100: #ffffff;
+	--base-200: #f1f6f8;
+	--base-300: #ecf3f6;
+	--base-300-a: #ecf3f6;
+	--base-400: #e3edf1;
+	--base-500: #e0eaee;
+	--base-600: #747e93;
+	--base-700: #444966;
+	--base-800: #2e3241;
+	--base-900: #171a1e;
+	--brand-primary-active: #2f68c5;
+	--core-positive: #4aa372;
+	--core-negative: #bf3f4d;
+	// can delete later
+	--colorPositive: #4aa372;
+	--colorNegative: #bf3f4d;
+	// can delete later
+	--base-tr-100: rgba(255, 255, 255, 0.9);
+	--btn-brandPrimary: #3b82f6;
+	/*for footer*/
+	--brand-100: #fbd20f;
+	/*for footer*/
+	--brandPrimaryDark: #2f68c5;
+	--white: #fff;
+}
+html:root body.starship-v2.dark-theme,
+html:root body.starship-v2.dark-theme *,
+header.starship-v2.dark-theme {
+	--base-0: #131318;
+	--base-100: #17191d;
+	--base-200: #201d23;
+	--base-300: #242228;
+	--base-300-a: #2f343e;
+	--base-400: #2b2930;
+	--base-500: #36343b;
+	--base-600: #615d67;
+	--base-700: #938f99;
+	--base-800: #cac4d0;
+	--base-900: #e6e0e9;
+	--brand-primary-active: #76a8f9;
+	--core-positive: #4aa372;
+	--core-negative: #bf3f4d;
+	// can delete later
+	--colorPositive: #4aa372;
+	--colorNegative: #bf3f4d;
+	// can delete later
+	--base-tr-100: rgba(36, 34, 40, 0.8);
+	/*need to follow same variable style*/
+	$brand-100: #fbd20f;
+	/*need to follow same variable style*/
+	--brandPrimaryDark: #76a8f9;
+}
+
+body.starship-v2.dark-theme,
+header.starship-v2.dark-theme {
+	background-color: var(--base-100);
+}
+
+body.starship-v2 {
+	.starship-toottip-overlay {
+		padding-bottom: 0px;
+	}
+	.ant-tooltip-arrow {
+		display: none;
+	}
+}
+/*These are temp fixes we need to update this in starship on later*/
+body.starship-v2 .starship-Modal .ant-modal-content {
+	border: 1px solid var(--base-400);
+	background-color: var(--base-tr-100);
+	border-radius: 8px;
+	box-shadow: 0px 6px 4px 0px rgba(0, 0, 0, 0.04), 0px 8px 8px 0px rgba(0, 0, 0, 0.04),
+		0px 4px 4px 0px rgba(0, 0, 0, 0.04);
+	backdrop-filter: blur(24px);
+}
+body.starship-v2 .ant-modal-mask {
+	background: var(--base-100) !important;
+	opacity: 0.8 !important;
+}
+html body.starship-v2 span.starship-tooltip-text {
+	color: var(--base-700) !important;
+	border-bottom: 2px dashed var(--base-500) !important;
+	&:hover,
+	&.active,
+	&.ant-tooltip-open {
+		color: var(--base-800) !important;
+	}
+}
+html body.starship-v2 svg.starship-tooltip-text {
+	color: var(--base-600) !important;
+	border-bottom: 0px !important;
+	&:hover,
+	&.active,
+	&.ant-tooltip-open {
+		color: var(--base-900) !important;
+	}
+}
+html body.starship-v2 .yellowWarning {
+	color: var(--brand-100) !important;
+	cursor: pointer;
+}
+html body.starship-v2 .starship-btn.ant-btn-primary.ant-btn-loading {
+	border: 2px solid transparent !important;
+	opacity: 0.8 !important;
+	&.ant-btn:before {
+		opacity: 0 !important;
+	}
+}
+/*These are temp fixes we need to update this in star
+
+ship on later*/
