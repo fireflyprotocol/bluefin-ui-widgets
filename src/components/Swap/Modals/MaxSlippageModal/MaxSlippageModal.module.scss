@@ -1,0 +1,141 @@
+.slippageGroup {
+	border-radius: 8px;
+	border: 1px solid var(--base-500, #36343b);
+	padding: 4px;
+	.slippageOption {
+		border-radius: 4px;
+		background: transparent;
+		color: var(--baseColor-base-800, #cac4d0);
+		text-align: center;
+		font-kerning: none;
+		font-feature-settings: "case" on, "calt" off, "liga" off;
+		/* text-xs */
+		font-family: "Plus Jakarta Sans";
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 133.333% */
+		display: flex;
+		align-items: center; /* Vertical alignment */
+		justify-content: center; /* Horizontal alignment */
+		border: none;
+	}
+	:global(
+			.ant-radio-button-wrapper-checked:not(
+					[class*=" ant-radio-button-wrapper-disabled"]
+				).ant-radio-button-wrapper:first-child
+		) {
+		border-radius: 4px;
+		background: var(--baseColor-base-500, #36343b);
+		color: var(--baseColor-base-800, #cac4d0);
+		outline: none;
+		text-align: center;
+		font-kerning: none;
+		font-feature-settings: "case" on, "calt" off, "liga" off;
+		/* text-xs */
+		font-family: "Plus Jakarta Sans";
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 133.333% */
+	}
+	:global(
+			.ant-radio-button-wrapper-checked:not(
+					.ant-radio-button-wrapper-disabled
+				):focus-within
+		) {
+		box-shadow: none;
+	}
+}
+.slippageInput {
+	:global(.ant-input) {
+		text-align: center;
+	}
+}
+.model {
+	color: var(--baseColor-base-700, #938f99) !important;
+	font-kerning: none;
+	font-feature-settings: "case" on, "calt" off, "liga" off;
+	/* text-sm */
+	font-family: "Plus Jakarta Sans";
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 16px; /* 123.077% */
+	:global(.ant-modal-title) {
+		color: var(--baseColor-base-800, #cac4d0) !important;
+		font-kerning: none;
+		font-feature-settings: "ss04" on, "calt" off, "liga" off;
+		/* header-h6 */
+		font-family: "Plus Jakarta Sans";
+		font-size: 20px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 120% */
+		letter-spacing: -0.8px;
+	}
+	:global(.ant-modal-footer) {
+		padding: 16px 12px;
+		margin-left: -24px;
+		margin-right: -24px;
+		margin-bottom: -26px;
+		display: block;
+		border: 1px solid var(--baseColor-base-300, #242228);
+		background: var(--baseColor-base-100, #17191d);
+		border-bottom-left-radius: 8px;
+		border-bottom-right-radius: 8px;
+		text-align: start;
+	}
+	:global(.ant-modal-content) {
+		border-radius: 8px;
+		border: 1px solid var(--baseColor-base-400, #2b2930);
+		background: var(--baseColor-base-tr-100, rgba(36, 34, 40, 0.8)) !important;
+		/* dropdown-shadow */
+		box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.04),
+			0px 8px 8px 0px rgba(0, 0, 0, 0.04), 0px 6px 4px 0px rgba(0, 0, 0, 0.04);
+		backdrop-filter: blur(24px);
+	}
+	.warning {
+		color: var(--coreColor-colorWarning, #cdb370);
+		:global(.ant-input) {
+			color: var(--coreColor-colorWarning, #cdb370) !important;
+		}
+	}
+}
+
+.buttonConfirmSlippage {
+	color: var(--coreColor-colorStaticLight, #fef7ff) !important;
+	font-kerning: none;
+	font-feature-settings: "calt" off, "liga" off;
+	/* text-sm-bd */
+	font-family: "Plus Jakarta Sans";
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 600;
+	line-height: 16px; /* 123.077% */
+}
+:global(.starship-Modal) {
+	border-radius: 8px;
+	border: 1px solid var(--baseColor-base-400, #2b2930);
+	background: var(--baseColor-base-tr-100, rgba(36, 34, 40, 0.8)) !important;
+	/* dropdown-shadow */
+	box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.04), 0px 8px 8px 0px rgba(0, 0, 0, 0.04),
+		0px 6px 4px 0px rgba(0, 0, 0, 0.04);
+	backdrop-filter: blur(24px);
+}
+:global(.ant-input),
+:global(.ant-input-affix-wrapper) {
+	box-shadow: none !important;
+	border: none !important;
+	border-radius: 8px;
+	background: var(--baseColor-base-400, #2b2930) !important;
+}
+
+:global(.starship-btn-neutral) {
+	text-shadow: none;
+	box-shadow: none;
+	background-color: var(--base-400) !important;
+	background: var(--base-400);
+	color: var(--base-800) !important;
+	border: 2px solid var(--base-400) !important;
+}

@@ -1,0 +1,161 @@
+.slippageGroup {
+	border-radius: 8px;
+	border: 1px solid var(--base-500, #36343b);
+	padding: 4px;
+	.slippageOption {
+		border-radius: 4px;
+		background: transparent;
+		color: var(--baseColor-base-800, #cac4d0);
+		text-align: center;
+		font-kerning: none;
+		font-feature-settings: "case" on, "calt" off, "liga" off;
+		/* text-xs */
+		font-family: "Plus Jakarta Sans";
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 133.333% */
+		display: flex;
+		align-items: center; /* Vertical alignment */
+		justify-content: center; /* Horizontal alignment */
+		border: none;
+	}
+	:global(
+			.ant-radio-button-wrapper-checked:not(
+					[class*=" ant-radio-button-wrapper-disabled"]
+				).ant-radio-button-wrapper:first-child
+		) {
+		border-radius: 4px;
+		background: var(--baseColor-base-500, #36343b);
+		color: var(--baseColor-base-800, #cac4d0);
+		outline: none;
+		text-align: center;
+		font-kerning: none;
+		font-feature-settings: "case" on, "calt" off, "liga" off;
+		/* text-xs */
+		font-family: "Plus Jakarta Sans";
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 16px; /* 133.333% */
+	}
+	:global(
+			.ant-radio-button-wrapper-checked:not(
+					.ant-radio-button-wrapper-disabled
+				):focus-within
+		) {
+		box-shadow: none;
+	}
+}
+.slippageInput {
+	:global(.ant-input) {
+		text-align: center;
+	}
+}
+.model {
+	max-height: 575px;
+	overflow-y: hidden;
+	color: var(--baseColor-base-700, #938f99) !important;
+	font-kerning: none;
+	font-feature-settings: "case" on, "calt" off, "liga" off;
+	/* text-sm */
+	font-family: "Plus Jakarta Sans";
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 500;
+	line-height: 16px; /* 123.077% */
+	:global(.ant-modal-title) {
+		color: var(--baseColor-base-800, #cac4d0) !important;
+		font-kerning: none;
+		font-feature-settings: "ss04" on, "calt" off, "liga" off;
+		/* header-h6 */
+		font-family: "Plus Jakarta Sans";
+		font-size: 20px;
+		font-style: normal;
+		font-weight: 600;
+		line-height: 24px; /* 120% */
+		letter-spacing: -0.8px;
+	}
+
+	.divider {
+		//border-top: 1px solid var(--base-400, #2b2930);
+		background: var(--baseColor-base-400, #2b2930);
+		margin: 0px;
+	}
+	.roundedText {
+		border-radius: 48px !important;
+	}
+	:global(.starship-btn-neutral) {
+		text-shadow: none;
+		box-shadow: none;
+		background-color: var(--baseColor-base-400, #2b2930) !important;
+		background: var(--baseColor-base-400, #2b2930) !important;
+		color: var(--baseColor-base-800, #cac4d0) !important;
+		border: 2px solid var(--baseColor-base-400, #2b2930) !important;
+	}
+	:global(.ant-modal-content) {
+		border-radius: 8px;
+		border: 1px solid var(--baseColor-base-400, #2b2930);
+		background: var(--baseColor-base-tr-100, rgba(36, 34, 40, 0.8)) !important;
+		/* dropdown-shadow */
+		box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.04),
+			0px 8px 8px 0px rgba(0, 0, 0, 0.04), 0px 6px 4px 0px rgba(0, 0, 0, 0.04);
+		backdrop-filter: blur(24px);
+	}
+	:global(.ant-input),
+	:global(.ant-input-affix-wrapper) {
+		background: var(--baseColor-base-400, #2b2930) !important;
+		box-shadow: none !important;
+		border: none !important;
+	}
+	.viewTile {
+		.title {
+			color: var(--baseColor-base-900, #e6e0e9);
+			font-size: 13px;
+			font-style: normal;
+			line-height: 16px; /* 123.077% */
+		}
+		.subInfo {
+			color: var(--baseColor-base-700, #938f99);
+
+			font-size: 12px;
+			font-style: normal;
+			font-style: normal;
+			line-height: 16px; /* 123.077% */
+		}
+	}
+
+	.width100 {
+		width: 100%;
+	}
+
+	.flexSpace {
+		display: flex;
+	}
+
+	.textAlignCenter {
+		text-align: center;
+	}
+
+	.overflowScroll {
+		overflow-y: scroll;
+		height: 100%;
+	}
+}
+
+.buttonConfirmSlippage {
+	color: var(--coreColor-colorStaticLight, #fef7ff) !important;
+	font-kerning: none;
+	font-feature-settings: "calt" off, "liga" off;
+	/* text-sm-bd */
+	font-family: "Plus Jakarta Sans";
+	font-size: 13px;
+	font-style: normal;
+	font-weight: 600;
+	line-height: 16px; /* 123.077% */
+}
+
+.overflowScrollTokenList {
+	overflow-y: scroll;
+	height: 490px;
+}
