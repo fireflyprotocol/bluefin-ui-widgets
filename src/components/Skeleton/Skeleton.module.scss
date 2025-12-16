@@ -1,0 +1,6 @@
+.skeleton {
+  :global(.react-loading-skeleton) {
+    --base-color: var(--base-300) !important;
+    --highlight-color: var(--base-400) !important;
+  }
+}
